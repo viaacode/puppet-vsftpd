@@ -61,16 +61,21 @@ class vsftpd (
   $banner_file             = undef,
   $allow_writeable_chroot  = undef,
   $directives              = {},
+  $enable_running          = true, #if false: disable and do not control state
 ) inherits ::vsftpd::params {
 
   package { $package_name: ensure => installed }
 
   service { $service_name:
     require   => Package[$package_name],
-    enable    => true,
-    ensure    => running,
+    enable    => $enable_running,
+    ensure    => $enable_running ? {
+      true    => 'running',
+      default => undef
+    },
     hasstatus => true,
   }
+
 
   file { "${confdir}/vsftpd.conf":
     require => Package[$package_name],
